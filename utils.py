@@ -35,8 +35,8 @@ def make_packet(seqnum, data, flag=0):
     packet_content = (seqnum.to_bytes(2, byteorder='big') +
                       flag.to_bytes(1, byteorder='big') +
                       data)
-    csum = checksum(packet_content)
-    return csum.to_bytes(1, byteorder='big') + packet_content
+    checkSum = checksum(packet_content)
+    return checkSum.to_bytes(1, byteorder='big') + packet_content
 
 
 def make_ack(seqnum):

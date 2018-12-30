@@ -2,7 +2,7 @@ from utils import *
 import socket
 import time, sys
 import sys
-
+import ntplib
 class Source():
 
     def __init__(self, port=None):
@@ -19,20 +19,20 @@ class Source():
 
 
     def sendFile(self, filename, to):
-        start_time = time.time()
+        print("Start to send file: " + filename)
+        c = ntplib.NTPClient()     
+        response = c.request('time.google.com')
+        timer = response.tx_time
+        print("First packet send at {}".format(timer))
         try:
             self.localSocket.connect(to)
         except:
             print("Cannot connect to {}.".format(to), file=sys.stderr)
             sys.exit(-1)
 
-        print("Start to send file: " + filename)
-
         for data in readFile(filename, chunk_size=DATA_LENGTH):
             self.localSocket.send(data)
 
-
-        print("Starting time : ",start_time)
 
     def shutDown(self):
         try:

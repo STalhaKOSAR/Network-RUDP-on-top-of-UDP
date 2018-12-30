@@ -19,7 +19,7 @@ class SendToDest:
             self.localSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             if self.port is not None:
                 self.localSocket.bind(('', self.port))
-                print("Successfully setup socket at {}".format(self.port))
+                # print("Successfully setup socket at {}".format(self.port))
         except socket.error:
             print("Cannot setup the socket.", file=sys.stderr)
             sys.exit(-1)
@@ -61,12 +61,12 @@ class SendToDest:
                 if time.time() - self.timer < self.TIMEOUT:
                     self.start_timer()
                     self.sendAll(sendTo)
-                    print("go back n, resend all")
+                    print("Go back N")
             else:
-                csum, rsum, seq, _, _ = parse_packet(pkt)
+                checkSum, sum, seq, _, _ = parse_packet(pkt)
 
                 # not corrupted
-                if csum == rsum:
+                if checkSum == sum:
                     # cumulative acknowledgement
                     cum_acks = seq - oldest_unack + 1
                     if cum_acks < 0: # seqnum restarts from zero
@@ -98,9 +98,9 @@ class ReceiveFromSource():
             self.localSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             if port is not None:
                 self.localSocket.bind(('', port))
-                print("Successfully setup socket at port {}".format(port))
+                # print("Successfully setup socket at port {}".format(port))
                 self.localSocket.listen()
-                print("localSocket starts to listen.")
+                # print("localSocket starts to listen.")
         except socket.error as e:
             print(e)
             print("Cannot setup the socket.", file=sys.stderr)
@@ -118,12 +118,13 @@ class ReceiveFromSource():
                 data = self.receiveSocket.recv(DATA_LENGTH)
 
                 if random.uniform(0,1) < 0.5:
-                    sender.send(data,("10.10.5.2",12006))
+                    sender.send(data,("localhost",12006))
 
                 else :
-                    sender.send(data,("10.10.3.2",12006))
+                    sender.send(data,("localhost",12007))
 
                 if not data:
+                    print("Received.")
                     break
                 yield data
                 # last packet, don't wait for timeout
@@ -144,7 +145,6 @@ class ReceiveFromSource():
                 for data in received:
                     fl.write(data)
             self.receiveSocket.close()
-            print("\nReceived.")
 
     def shutDown(self):
         try:
