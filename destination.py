@@ -25,7 +25,7 @@ class Destination:
         acks = 0
         nacs = 0
 
-        self.localSocket.settimeout(60) # no one can wait for so long
+        self.localSocket.settimeout(60) 
         while True:
             try:
                 message, address = self.localSocket.recvfrom(MAX_SIZE)
@@ -57,16 +57,12 @@ class Destination:
     def recvFile(self):
         print("waiting for file")
 
-        # unpack metadata
         received = self.recv()
 
-        # start collect file chunks
         with open('saved/' + "input2.txt", 'wb') as dl:
             for data in received:
                 dl.write(data)
 
-        # deprecated: 
-        #print("start_time: {}, end_time: {}".format(start_time, end_time))
         print("Received: {}.".format("input2.txt"))
 
 
