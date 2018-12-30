@@ -18,10 +18,6 @@ class Source():
             sys.exit(-1)
 
 
-    def send(self, data,flag = 0):
-        self.localSocket.send(data)
-
-
     def sendFile(self, filename, to):
         start_time = time.time()
         try:
@@ -33,7 +29,7 @@ class Source():
         print("Start to send file: " + filename)
 
         for data in readFile(filename, chunk_size=DATA_LENGTH):
-            self.send(data)
+            self.localSocket.send(data)
 
 
         print("Starting time : ",start_time)

@@ -121,7 +121,7 @@ class ReceiveFromSource():
                     sender.send(data,("10.10.5.2",12006))
 
                 else :
-                    sender.send(data,("10.10.3.2",12007))
+                    sender.send(data,("10.10.3.2",12006))
 
                 if not data:
                     break
