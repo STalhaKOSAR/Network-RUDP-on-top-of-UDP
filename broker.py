@@ -118,10 +118,10 @@ class ReceiveFromSource():
                 data = self.receiveSocket.recv(DATA_LENGTH)
 
                 if random.uniform(0,1) < 0.5:
-                    sender.send(data,("localhost",12006))
+                    sender.send(data,("10.10.5.2",12006))
 
                 else :
-                    sender.send(data,("localhost",12007))
+                    sender.send(data,("10.10.3.2",12007))
 
                 if not data:
                     break
