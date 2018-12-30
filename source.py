@@ -19,7 +19,6 @@ class Source():
 
 
     def send(self, data,flag = 0):
-        packet = make_packet(0, data, flag)
         self.localSocket.send(data)
 
 
