@@ -1,102 +1,189 @@
-from utils import *
 import socket
-import time, sys
-import random
+import time
+import sys
 import threading
 import ntplib
+import os
 
-
-nextseq = 0
+nextSequnceNumber = 0
 i = 0
-deneme = []
-deneme2 = []
+allPackets = []
+output = []
+flag = 0
+
+#Maximum packet size to receive 
+MAX_PACKET_SIZE = 1000
+
+
 class Destination:
 
+    """  
+        Constructor for RDT over UDP with given port 
+    """
     def __init__(self, port=None):
-        self.local = port
-        self.pkts = []
-        # self.nextseq = 0
+        self.port = port
         self.setup()
 
+    """  
+        Setup socket to send packets from broker to destination
+    """
     def setup(self):
         try:
+            #Open UDP connection to receive packets
             self.localSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            if self.local is not None:
-                self.localSocket.bind(('', self.local))
-                print("Successfully setup socket at {}".format(self.local))
+            if self.port is not None:
+                self.localSocket.bind(('', self.port))
+                print("Successfully setup socket at {}".format(self.port))
         except socket.error:
             print("Cannot setup the socket.", file=sys.stderr)
             sys.exit(-1)
     
-    def saver(self,message):
+    """  
+        Parse packet and return checkSum, receivedSum, sequence number, flag and data
+        Sequence number is 2 byte
+        Checksum is 1 byte
+        Flag is 1 byte
+        And the rest is our data
+    """
+    def parsePacket(self, data):
+        # calculate new checksum
+        checkSum = self.checksum(data[1:])
+        receivedSum = int.from_bytes(data[:1], byteorder='big')
+        seqnum = int.from_bytes(data[1:3], byteorder='big')
+        flag = int.from_bytes(data[3:4], byteorder='big')
+        data = data[4:]
+
+        return checkSum, receivedSum, seqnum, flag, data
+
+
+    """  
+        Make packet with the given seqnum,data and flag then calculate checksum and return packet
+        Sequence number is 2 byte
+        Checksum is 1 byte
+        Flag is 1 byte
+        And the rest is our data
+    """    
+    def makePacket(self, seqnum, data, flag=0):    
+        packet = (seqnum.to_bytes(2, byteorder='big') +
+                        flag.to_bytes(1, byteorder='big') +
+                        data)
+        # calculate checksum of our packet
+        checkSum = self.checksum(packet)
+        return checkSum.to_bytes(1, byteorder='big') + packet
+
+    # Make ACK packet
+    def makeACK(self, seqnum):
+        return self.makePacket(seqnum, bytes())
+
+    """  
+        Calculate checksum with getting sum of our data and and it with 0xff to get unsigned value
+    """
+    def checksum(self, data):
+        return sum(data) & 0xff
+
+    """  
+        Save all packets 
+    """
+    def saveAllPackets(self,message):
         global i
-        deneme.append(message)
+        allPackets.append(message)
         i += 1
 
+
+    """  
+        Parse saved packets sort them inorder to sequence number and write them to the output2.txt
+    """
     def writeToFile(self):
-        for i in range (0,len(deneme)):
-            checkSum, sum, seqnum, flag, data = parse_packet(deneme[i])
-            deneme2.append([seqnum,data]) 
+        global flag
+        if flag==0:
+            flag = 1
+            for i in range (0,len(allPackets)):
+                checkSum, sum, seqnum, flag, data = self.parsePacket(allPackets[i])
+                output.append([seqnum,data]) 
+            # Sort the packets
+            output.sort()
+            for i in range (0,len(allPackets)):
+                allPackets[i] =output[i][1]
 
-        deneme2.sort()
-        for i in range (0,len(deneme)):
-            deneme[i] =deneme2[i][1]
+            with open("output2.txt", 'wb') as file:
+                for data in allPackets:
+                    file.write(data)
 
-        with open('saved/' + "input2.txt", 'wb') as fl:
-            for data in deneme:
-                fl.write(data)
+            print("Saved to output2.txt")
+            os._exit(1)
 
-        print("Saved to input2.txt")
-
+    """  
+        Send single packet 
+    """
     def recv(self):
-        global nextseq,deneme
+        global nextSequnceNumber,allPackets
         ACKS = 0
         NACKS = 0
-
+        # Set timeout to not wait for long
         self.localSocket.settimeout(60) 
         while True:
             try:
-                message, address = self.localSocket.recvfrom(MAX_SIZE)
-                checkSum, sum, seqnum, flag, data = parse_packet(message)
-                self.saver(message)
-                # check sum and seqnum
-                if checkSum != sum or seqnum != nextseq:
-                    ACK = make_ack(nextseq - 1)
+                message, address = self.localSocket.recvfrom(MAX_PACKET_SIZE)
+                checkSum, sum, seqnum, flag, data = self.parsePacket(message)
+                self.saveAllPackets(message)
+
+                # Compare received checkSum and calculated checkSum also check for sequence number is correct
+                if checkSum != sum or seqnum != nextSequnceNumber:
+                    # Make ACK with next sequnce number
+                    ACK = self.makeACK(nextSequnceNumber - 1)
+                    # Increment NACKS because chechksum not equal received sum
                     NACKS += 1
+                    # Send ACK to Broker
                     self.localSocket.sendto(ACK, address)
-                    # print("ACK: {}, NAK: {}.".format(ACKS, NACKS), end='\r')
+                    print("ACK: {}, NAK: {}.".format(ACKS, NACKS), end='\r')
                 else:
-                    # ACK
-                    ACK = make_ack(nextseq)
+                    # Make ACK with next sequnce number
+                    ACK = self.makeACK(nextSequnceNumber)
+                    # Send ACK to Broker
                     self.localSocket.sendto(ACK, address)
+                    # Increment ACK Number
                     ACKS += 1
-                    # print("ACKS: {}, NAK: {}.".format(ACKS, NACKS), end='\r')
-                    nextseq = (nextseq + 1) & 0xffff
+                    print("ACKS: {}, NAK: {}.".format(ACKS, NACKS), end='\r')
+                    # Change nextSequnce because packet arrived correctly
+                    nextSequnceNumber = (nextSequnceNumber + 1) & 0xffff
+                    # Yield the data
                     yield data
 
                     # Last packet received
                     if flag == 2 or data==b'' :
+                        # Connect NTP server to get the current time
                         c = ntplib.NTPClient()     
                         response = c.request('time.google.com')
                         timer = response.tx_time
                         print("Last packet received at {}".format(timer))
+                        
+                        # Get the time where first packet sent from Source
+                        file = open("time.txt", 'r')
+                        startTime = float(file.read())
+                        file.close()
+
+                        # Calculate the time when all packets arrived
+                        print("Total time is : {} seconds".format(timer-startTime))
                         break
             
             except socket.timeout:
-                print('timeout ? end.')
+                print('Time out')
                 break
 
-    def recvFile(self):
-        print("waiting for file")
+    """  
+        Receive packets from Broker
+    """
+    def recvPackets(self):
         received = self.recv()
         i = 0
         for data in received:
-            i = 1
-        
-        self.writeToFile()
-    
+            i += 1
+        # Write all packets to the input2.txt
+        self.writeToFile()    
 
-
+    """  
+        Close the connection
+    """
     def shutDown(self):
         try:
             self.localSocket.close()
@@ -106,28 +193,42 @@ class Destination:
 
 
 
+""" 
+    args we take from command line
+    first one is Port for Router 1
+    second one is Port for Router 2
+"""
 argv = sys.argv
-
 
 port = int(argv[1])
 port2 = int(argv[2])
 
+# Construct Sockets to listen given ports
 destination = Destination(port)
 destination2 = Destination(port2)
 
-threads = []
 
+print("Waiting For file")
+
+
+""" 
+    Start 2 thread to listen to given ports simultaneously
+"""
 try:
-    thread1 = threading.Thread(target=destination.recvFile)
-    thread2 = threading.Thread(target=destination2.recvFile)
+    # Create thread with given IP and Port
+    thread1 = threading.Thread(target=destination.recvPackets)
+    thread2 = threading.Thread(target=destination2.recvPackets)
+    # Start threads
     thread1.start()
     thread2.start()
+    # Join threads to work properly
     thread1.join()
     thread2.join()
 
 except:
     print ("Error: unable to start thread")
 
+# Close the connections
 destination.shutDown()
 destination2.shutDown()
 
