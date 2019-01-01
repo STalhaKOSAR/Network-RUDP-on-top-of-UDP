@@ -11,13 +11,22 @@ In this part of project we are sending data from source to destination with RDT 
 To install pip,
 
 ```bash
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+sudo apt-get update
 ```
 Then run the following:
 
 ```bash
-sudo python3 get-pip.py
+sudo apt-get install python3-pip
 ```
+
+If you get Python locale error: unsupported locale setting,run the following commands
+
+```bash
+export LC_ALL="en_US.UTF-8"
+export LC_CTYPE="en_US.UTF-8"
+sudo dpkg-reconfigure locales
+```
+
 
 ## NTP Installation
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install NTP.

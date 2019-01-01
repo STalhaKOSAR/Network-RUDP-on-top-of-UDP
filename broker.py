@@ -33,7 +33,7 @@ class SendToDest:
             print("Cannot setup the socket.", file=sys.stderr)
             sys.exit(-1)
 
-    TIMEOUT = 0.5
+    TIMEOUT = 5
    
     """  
         Parse packet and return checkSum, receivedSum, sequence number, flag and data
@@ -112,7 +112,7 @@ class SendToDest:
         # get oldest unacked and and it with 0xff to get unsigned value
         lastUnacked = (self.nextSequnceNumber - unacked) & 0xffff
         # Set the timeout for socket
-        self.localSocket.settimeout(0.2)
+        self.localSocket.settimeout(2)
         lastSent = False
 
         # Send the last packet
