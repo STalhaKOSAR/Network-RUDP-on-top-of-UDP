@@ -80,19 +80,19 @@ python source.py [IP to Send] [Port to Send] [Input File]
 ## To add Packet Loss Percentage
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 0.5% corrupt 0% duplicate 0% delay 3 ms reorder 0% 0%
+sudo tc qdisc change dev eth0 root netem loss 0.5% corrupt 0% duplicate 0% delay 3 reorder 0% 0%
 ```
 
 This causes the added packet loss with 0.5 percentage and added delay 3ms to the interface named eth0.
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 10% corrupt 0% duplicate 0% delay 3 ms reorder 0% 0%
+sudo tc qdisc change dev eth0 root netem loss 10% corrupt 0% duplicate 0% delay 3 reorder 0% 0%
 ```
 
 This causes the added packet loss with 10 percentage and added delay 3ms to the interface named eth0.
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 20% corrupt 0% duplicate 0% delay 3 ms reorder 0% 0%
+sudo tc qdisc change dev eth0 root netem loss 20% corrupt 0% duplicate 0% delay 3 reorder 0% 0%
 ```
 
 This causes the added packet loss with 20 percentage and added delay 3ms to the interface named eth0.
@@ -100,19 +100,19 @@ This causes the added packet loss with 20 percentage and added delay 3ms to the 
 ## To add Corruption Percentage
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0.2% duplicate 0% delay 3 ms reorder 0% 0%
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0.2% duplicate 0% delay 3 reorder 0% 0%
 ```
 
 This causes the added corruption with 0.2 percentage and added delay 3ms to the interface named eth0.
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 0% corrupt 10% duplicate 0% delay 3 ms reorder 0% 0%
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 10% duplicate 0% delay 3 reorder 0% 0%
 ```
 
 This causes the added corruption with 10 percentage and added delay 3ms to the interface named eth0.
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 0% corrupt 20% duplicate 0% delay 3 ms reorder 0% 0%
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 20% duplicate 0% delay 3 reorder 0% 0%
 ```
 
 This causes the added corruption with 20 percentage and added delay 3ms to the interface named eth0.
@@ -120,19 +120,19 @@ This causes the added corruption with 20 percentage and added delay 3ms to the i
 ## To add Reordering Percentage
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 ms reorder 1% 50%
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 reorder 1% 50%
 ```
 
 This causes the added reordering with 1 percentage and added delay 3ms to the interface named eth0.
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 ms reorder 10% 50%
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 reorder 10% 50%
 ```
 
 This causes the added reordering with 10 percentage and added delay 3ms to the interface named eth0.
 
 ```bash
-sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 ms reorder 35% 50%
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 reorder 35% 50%
 ```
 
 This causes the added reordering with 35 percentage and added delay 3ms to the interface named eth0.
