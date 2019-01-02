@@ -12,7 +12,7 @@ class SendToDest:
     """  
         Constructor for RDT over UDP with given port and window size
     """
-    def __init__(self, port=None, windowSize=5):
+    def __init__(self, port=None, windowSize=10):
         self.port = port
         self.windowSize = windowSize
         self.packets = []
@@ -27,7 +27,7 @@ class SendToDest:
             print("Cannot setup the socket.", file=sys.stderr)
             sys.exit(-1)
 
-    TIMEOUT = 0.4
+    TIMEOUT = 0.2
    
     """  
         Parse packet and return checkSum, receivedSum, sequence number, flag and data
@@ -104,7 +104,7 @@ class SendToDest:
         # get oldest unacked and 
         lastUnacked = (self.nextSequnceNumber - unacked) 
         # Set the timeout for socket
-        self.localSocket.settimeout(0.2)
+        self.localSocket.settimeout(0.1)
         lastSent = False
 
         # Send the last packet
@@ -188,13 +188,17 @@ class ReceiveFromSource():
             try:
                 # Receive packets from Source
                 data = self.receiveSocket.recv(MAX_PACKET_SIZE - 4)
+                flag = 0
+                # If last packets comes set flag to 2
+                if data == b'':
+                    flag = 2
 
                 """  
                     Start threads to send the data received from Source and send it from broker to destination
                 """
                 if self.getRandom():
                     # Create thread with given IP and Port
-                    thread1 = threading.Thread(target=sender.send,args = (data,(ipToSend,portToSend),))
+                    thread1 = threading.Thread(target=sender.send,args = (data,(ipToSend,portToSend),flag,))
                     # Start thread
                     thread1.start()
                     # Join thread the work properly
@@ -202,7 +206,7 @@ class ReceiveFromSource():
 
                 else :
                     # Create thread with given IP and Port
-                    thread2 = threading.Thread(target=sender.send,args = (data,(ipToSend2,portToSend2),))
+                    thread2 = threading.Thread(target=sender.send,args = (data,(ipToSend2,portToSend2),flag,))
                     # Start thread
                     thread2.start()
                     # Join thread to work properly
