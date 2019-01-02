@@ -18,12 +18,6 @@ class SendToDest:
         self.packets = []
         self.nextSequnceNumber = 0
         self.timer = 0.0
-        self.setup()
-
-    """  
-        Setup socket to send packets from broker to destination
-    """
-    def setup(self):
         try:
             #Open UDP connection to send packets
             self.localSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -33,7 +27,7 @@ class SendToDest:
             print("Cannot setup the socket.", file=sys.stderr)
             sys.exit(-1)
 
-    TIMEOUT = 5
+    TIMEOUT = 0.4
    
     """  
         Parse packet and return checkSum, receivedSum, sequence number, flag and data
@@ -45,9 +39,9 @@ class SendToDest:
     def parsePacket(self, data):
         # calculate new checksum
         checkSum = self.checksum(data[1:])
-        receivedSum = int.from_bytes(data[:1], byteorder='big')
-        seqnum = int.from_bytes(data[1:3], byteorder='big')
-        flag = int.from_bytes(data[3:4], byteorder='big')
+        receivedSum = int.from_bytes(data[:1], byteorder='little')
+        seqnum = int.from_bytes(data[1:3], byteorder='little')
+        flag = int.from_bytes(data[3:4], byteorder='little')
         data = data[4:]
 
         return checkSum, receivedSum, seqnum, flag, data
@@ -61,12 +55,12 @@ class SendToDest:
         And the rest is our data
     """
     def makePacket(self, seqnum, data, flag=0):
-        packet = (seqnum.to_bytes(2, byteorder='big') +
-                        flag.to_bytes(1, byteorder='big') +
+        packet = (seqnum.to_bytes(2, byteorder='little') +
+                        flag.to_bytes(1, byteorder='little') +
                         data)
         # calculate checksum of our packet
         checkSum = self.checksum(packet)
-        return checkSum.to_bytes(1, byteorder='big') + packet
+        return checkSum.to_bytes(1, byteorder='little') + packet
 
     """  
         Calculate checksum with getting sum of our data and and it with 0xff to get unsigned value
@@ -88,8 +82,8 @@ class SendToDest:
         # Add packet to packets to be able to send it again if timeout occurs
         self.packets.append(pkt)
         self.localSocket.sendto(pkt, sendTo)
-        # Get nextSequnceNumber and and it with 0xff to get unsigned value
-        self.nextSequnceNumber = (self.nextSequnceNumber + 1) & 0xffff
+        # Get nextSequnceNumber 
+        self.nextSequnceNumber = self.nextSequnceNumber + 1
         # if there is one packet in our list start timer to calculate if there is timeout or not
         if len(self.packets) == 1:
             self.startTimer()
@@ -109,10 +103,10 @@ class SendToDest:
         unacked = len(self.packets)
         # create new packet with the given seqnum,flag and data
         packet = self.makePacket(self.nextSequnceNumber, data, flag)
-        # get oldest unacked and and it with 0xff to get unsigned value
-        lastUnacked = (self.nextSequnceNumber - unacked) & 0xffff
+        # get oldest unacked and 
+        lastUnacked = (self.nextSequnceNumber - unacked) 
         # Set the timeout for socket
-        self.localSocket.settimeout(2)
+        self.localSocket.settimeout(0.2)
         lastSent = False
 
         # Send the last packet
@@ -124,7 +118,7 @@ class SendToDest:
             Wait for ACK for unacked if unackeds are greater then windowSize or
             If the packet is last one and there is still unacked packets wait for ACK        
         """
-        while unacked >= self.windowSize or (flag == 2 and unacked > 0):
+        while unacked >= self.windowSize or (unacked > 0 and flag == 2):
             try:
                 # Receive ACK from Destination
                 pkt, address = self.localSocket.recvfrom(MAX_PACKET_SIZE)
@@ -143,16 +137,13 @@ class SendToDest:
                 if checkSum == sum:
                     # Set Cumulative ACK number
                     cumAcks = seq - lastUnacked + 1
-                    # Since our sequence number is 2 bytes its restart from 0 after a while 
-                    if cumAcks < 0:
-                        cumAcks = seq + 1 + 0xffff - lastUnacked + 1
                     # Remove the already ACKed packet from our list
                     self.packets = self.packets[cumAcks:]
-                    print("seq: {},  cum ACK {}".format(seq, cumAcks), end='\r')
+                    print("seq: {},  Cumulative ACK {}".format(seq, cumAcks), end='\r')
                     # Set unacked packets
                     unacked -= cumAcks
-                    # Set last unacked and and it with 0xff to get unsigned value
-                    lastUnacked = (lastUnacked + cumAcks) & 0xffff
+                    # Set last unacked 
+                    lastUnacked = (lastUnacked + cumAcks) 
 
                     # If there is no unacked packets start timer 
                     if unacked != 0:

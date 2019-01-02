@@ -19,15 +19,10 @@ class Destination:
 
     """  
         Constructor for RDT over UDP with given port 
+        Setup socket to send packets from broker to destination
     """
     def __init__(self, port=None):
         self.port = port
-        self.setup()
-
-    """  
-        Setup socket to send packets from broker to destination
-    """
-    def setup(self):
         try:
             #Open UDP connection to receive packets
             self.localSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -37,7 +32,8 @@ class Destination:
         except socket.error:
             print("Cannot setup the socket.", file=sys.stderr)
             sys.exit(-1)
-    
+
+
     """  
         Parse packet and return checkSum, receivedSum, sequence number, flag and data
         Sequence number is 2 byte
@@ -48,9 +44,9 @@ class Destination:
     def parsePacket(self, data):
         # calculate new checksum
         checkSum = self.checksum(data[1:])
-        receivedSum = int.from_bytes(data[:1], byteorder='big')
-        seqnum = int.from_bytes(data[1:3], byteorder='big')
-        flag = int.from_bytes(data[3:4], byteorder='big')
+        receivedSum = int.from_bytes(data[:1], byteorder='little')
+        seqnum = int.from_bytes(data[1:3], byteorder='little')
+        flag = int.from_bytes(data[3:4], byteorder='little')
         data = data[4:]
 
         return checkSum, receivedSum, seqnum, flag, data
@@ -64,16 +60,13 @@ class Destination:
         And the rest is our data
     """    
     def makePacket(self, seqnum, data, flag=0):    
-        packet = (seqnum.to_bytes(2, byteorder='big') +
-                        flag.to_bytes(1, byteorder='big') +
+        packet = (seqnum.to_bytes(2, byteorder='little') +
+                        flag.to_bytes(1, byteorder='little') +
                         data)
         # calculate checksum of our packet
         checkSum = self.checksum(packet)
-        return checkSum.to_bytes(1, byteorder='big') + packet
+        return checkSum.to_bytes(1, byteorder='little') + packet
 
-    # Make ACK packet
-    def makeACK(self, seqnum):
-        return self.makePacket(seqnum, bytes())
 
     """  
         Calculate checksum with getting sum of our data and and it with 0xff to get unsigned value
@@ -130,7 +123,7 @@ class Destination:
                 # Compare received checkSum and calculated checkSum also check for sequence number is correct
                 if checkSum != sum or seqnum != nextSequnceNumber:
                     # Make ACK with next sequnce number
-                    ACK = self.makeACK(nextSequnceNumber - 1)
+                    ACK = self.makePacket(nextSequnceNumber - 1,bytes())
                     # Increment NACKS because chechksum not equal received sum
                     NACKS += 1
                     # Send ACK to Broker
@@ -138,13 +131,13 @@ class Destination:
                     print("ACK: {}, NAK: {}.".format(ACKS, NACKS), end='\r')
                 else:
                     # Make ACK with next sequnce number
-                    ACK = self.makeACK(nextSequnceNumber)
+                    ACK = self.makePacket(nextSequnceNumber,bytes())
                     # Send ACK to Broker
                     self.localSocket.sendto(ACK, address)
                     # Increment ACK Number
                     ACKS += 1
                     print("ACKS: {}, NAK: {}.".format(ACKS, NACKS), end='\r')
-                    # Change nextSequnce because packet arrived correctly
+                    # Change nextSequnce because packet arrived correctly aand it with 0xffff to get unsigned value
                     nextSequnceNumber = (nextSequnceNumber + 1) & 0xffff
                     # Yield the data
                     yield data

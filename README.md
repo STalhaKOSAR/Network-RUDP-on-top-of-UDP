@@ -63,17 +63,17 @@ Destination.py gets packets from Broker with RDT over UDP and writes them to out
 These commands need to apply one after another.
 
 ```bash
-python Destination.py [Port1 to Receive] [Port2 to Receive]
+python destination.py [Port1 to Receive] [Port2 to Receive]
 
 ```
 
 ```bash
-python Broker.py [Port to Receive] [IP1 to Send] [Port1 to Send] [IP2 to Send] [Port2 to Send]
+python broker.py [Port to Receive] [IP1 to Send] [Port1 to Send] [IP2 to Send] [Port2 to Send]
 
 ```
 
 ```bash
-python Source.py [IP to Send] [Port to Send] [Input File]
+python source.py [IP to Send] [Port to Send] [Input File]
 
 ```
 
