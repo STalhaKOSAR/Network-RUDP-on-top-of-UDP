@@ -85,6 +85,18 @@ sudo tc qdisc change dev eth0 root netem loss 0.5% corrupt 0% duplicate 0% delay
 
 This causes the added packet loss with 0.5 percentage and added delay 3ms to the interface named eth0.
 
+```bash
+sudo tc qdisc change dev eth0 root netem loss 10% corrupt 0% duplicate 0% delay 3 ms reorder 0% 0%
+```
+
+This causes the added packet loss with 10 percentage and added delay 3ms to the interface named eth0.
+
+```bash
+sudo tc qdisc change dev eth0 root netem loss 20% corrupt 0% duplicate 0% delay 3 ms reorder 0% 0%
+```
+
+This causes the added packet loss with 20 percentage and added delay 3ms to the interface named eth0.
+
 ## To add Corruption Percentage
 
 ```bash
@@ -93,13 +105,37 @@ sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0.2% duplicate 0% delay
 
 This causes the added corruption with 0.2 percentage and added delay 3ms to the interface named eth0.
 
+```bash
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 10% duplicate 0% delay 3 ms reorder 0% 0%
+```
+
+This causes the added corruption with 10 percentage and added delay 3ms to the interface named eth0.
+
+```bash
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 20% duplicate 0% delay 3 ms reorder 0% 0%
+```
+
+This causes the added corruption with 20 percentage and added delay 3ms to the interface named eth0.
+
 ## To add Reordering Percentage
 
 ```bash
 sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 ms reorder 1% 50%
 ```
 
-This causes the added packet loss with 0.5 percentage and added delay 3ms to the interface named eth0.
+This causes the added reordering with 1 percentage and added delay 3ms to the interface named eth0.
+
+```bash
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 ms reorder 10% 50%
+```
+
+This causes the added reordering with 10 percentage and added delay 3ms to the interface named eth0.
+
+```bash
+sudo tc qdisc change dev eth0 root netem loss 0% corrupt 0% duplicate 0% delay 3 ms reorder 35% 50%
+```
+
+This causes the added reordering with 35 percentage and added delay 3ms to the interface named eth0.
 
 ## To change Routing Table
 
