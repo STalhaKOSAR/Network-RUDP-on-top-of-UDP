@@ -60,9 +60,7 @@ class Destination:
         And the rest is our data
     """    
     def makePacket(self, seqnum, data, flag=0):    
-        packet = (seqnum.to_bytes(2, byteorder='little') +
-                        flag.to_bytes(1, byteorder='little') +
-                        data)
+        packet = (seqnum.to_bytes(2, byteorder='little') + flag.to_bytes(1, byteorder='little') + data)
         # calculate checksum of our packet
         checkSum = self.checksum(packet)
         return checkSum.to_bytes(1, byteorder='little') + packet
