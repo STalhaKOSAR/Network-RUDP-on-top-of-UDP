@@ -135,8 +135,8 @@ class Destination:
                     # Increment ACK Number
                     ACKS += 1
                     print("ACKS: {}, NAK: {}.".format(ACKS, NACKS), end='\r')
-                    # Change nextSequnce because packet arrived correctly aand it with 0xffff to get unsigned value
-                    nextSequnceNumber = (nextSequnceNumber + 1) & 0xffff
+                    # Change nextSequnce because packet arrived correctly
+                    nextSequnceNumber = nextSequnceNumber + 1
                     # Yield the data
                     yield data
 
