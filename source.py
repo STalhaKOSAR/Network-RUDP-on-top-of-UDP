@@ -28,10 +28,10 @@ class Source():
     """  
         Read file with the given chunk size 
     """
-    def readFile(self, filename, chunk_size=1000):
+    def readFile(self, filename, packet_size=1000):
         with open(filename, 'rb') as file:
             while True:
-                packet = file.read(chunk_size)
+                packet = file.read(packet_size)
                 if not packet:
                     break
                 yield packet
@@ -54,7 +54,7 @@ class Source():
             sys.exit(-1)
 
         # send every single packet to the Broker
-        for data in self.readFile(filename, chunk_size=(MAX_PACKET_SIZE - 4)):
+        for data in self.readFile(filename, packet_size=(MAX_PACKET_SIZE - 4)):
             self.localSocket.send(data)
 
         #Change time to String
