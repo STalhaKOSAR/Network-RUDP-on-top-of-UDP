@@ -28,7 +28,7 @@ class Source():
     """  
         Read file with the given chunk size 
     """
-    def readFile(self, filename, chunk_size=256):
+    def readFile(self, filename, chunk_size=1000):
         with open(filename, 'rb') as file:
             while True:
                 packet = file.read(chunk_size)
