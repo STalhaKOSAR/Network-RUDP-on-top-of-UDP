@@ -143,10 +143,10 @@ This causes the added reordering with 35 percentage and added delay 3ms to the i
 sudo route add -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.1 dev eth0
 ```
 
-This causes route the packets coming from 192.168.1.0 to the 192.168.1.1
+This causes route the packets coming to 192.168.1.0 to the 192.168.1.1
 
 ```bash
 sudo route del -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.1 dev eth0
 ```
 
-The above command will delete the route to 192.168.1.0 from the routing table.
+The above command will delete the route to 192.168.1.0 to 192.168.1.1 from the routing table.
