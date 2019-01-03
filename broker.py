@@ -31,7 +31,7 @@ class SendToDest:
    
     """  
         Parse packet and return checkSum, receivedSum, sequence number, flag and data
-        Sequence number is 2 byte
+        Sequence number is 2 bytes
         Checksum is 1 byte
         Flag is 1 byte
         And the rest is our data
@@ -61,7 +61,7 @@ class SendToDest:
         return checkSum.to_bytes(1, byteorder='little') + packet
 
     """  
-        Calculate checksum with getting sum of our data and and it with 0xff to get unsigned value
+        Calculate checksum with getting sum of our data and bitwise-and it with 0xff to get unsigned value
     """
     def checksum(self, data):
         return sum(data) & 0xff
