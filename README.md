@@ -1,9 +1,5 @@
 # CENG435 TERM PROJECT PART 2
 
-Group 26 <br />
-Furkan Doğan / 2098937 <br />
-Sinan Talha Koşar / 2099190 <br />
-
 In this part of project we are sending data from source to destination with RDT over UDP and TCP.We are sending 5MB file as a maximum 1000bytes of packets when we send first packet from source we are getting time with NTP server and write it to a file and at the Destination when we get last packet we are also getting time with the NTP and we are also getting time from file and print their difference to get end-to-end delay.
 
 ## PIP Installation
