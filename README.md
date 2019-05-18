@@ -146,3 +146,7 @@ sudo route del -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.1 dev eth0
 ```
 
 The above command will delete the route to 192.168.1.0 to 192.168.1.1 from the routing table.
+
+## Project Owners
+Sinan Talha KOSAR  
+[Furkan DOGAN](https://github.com/furkandoganktf)
